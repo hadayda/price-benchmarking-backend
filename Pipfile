@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django-environ = "*"
+django = "*"
+djangorestframework = "*"
+mysqlclient = "*"
+python-dateutil = "*"
+requests = "*"
+django-rq = "*"
+numpy = "*"
+openpyxl = "*"
+django-cors-headers = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11.6"
+python_full_version = "3.11.6"
