@@ -1,9 +1,10 @@
 import numpy
-import decimal
 
 import django.db.models
 import django.db.models.expressions
 import django.db.models.functions
+from django.contrib.postgres.aggregates import ArrayAgg
+
 from . import models
 
 
@@ -17,20 +18,14 @@ def calculate_market_rates_aggregated_data():
     ).order_by('effective_on').annotate(
         max_price=django.db.models.Max('price'),
         min_price=django.db.models.Min('price'),
-        ordered_prices=django.db.models.expressions.RawSQL(
-            """
-                SELECT GROUP_CONCAT(price) 
-                FROM benchmarking_marketrates 
-                WHERE destination = benchmarking_marketrates.destination 
-                  AND origin = benchmarking_marketrates.origin 
-                  AND effective_on = benchmarking_marketrates.effective_on
-                  ORDER BY price ASC
-            """,
-            []
+        ordered_prices=ArrayAgg(
+            django.db.models.functions.Cast(
+                'price', output_field=django.db.models.FloatField()
+            ), ordering='price'
         ),
     ).values('origin', 'destination', 'effective_on', 'max_price', 'min_price', 'ordered_prices')
     for data in aggregated_queryset:
-        ordered_prices = [float(price) for price in data['ordered_prices'].split(',') if price] if data['ordered_prices'] else []
+        ordered_prices = data['ordered_prices']
         median_price = numpy.percentile(ordered_prices, 50)
         percentile_90_price = numpy.percentile(ordered_prices, 90)
         percentile_10_price = numpy.percentile(ordered_prices, 10)

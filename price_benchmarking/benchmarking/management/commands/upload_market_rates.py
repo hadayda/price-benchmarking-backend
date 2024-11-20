@@ -21,6 +21,7 @@ class Command(django.core.management.base.BaseCommand):
         if not any([file_path, file_url]):
             logger.error('--file-path or --file-url need to be provided')
             return
+        logger.info('Reading Market Rates file')
         csv_data = self.read_csv(file_path, file_url)
         market_rates_parser = rates_parsers.MarketRatesParser(csv_data)
         market_rates_data = market_rates_parser.parse()
@@ -28,10 +29,12 @@ class Command(django.core.management.base.BaseCommand):
             logger.error(market_rates_parser.errors)
         market_rates_objects = [models.MarketRates(**market_rate) for market_rate in market_rates_data]
         paginator = django.core.paginator.Paginator(market_rates_objects, 1000)
+        total_count = 0
         for page_num in paginator.page_range:
             page = paginator.page(page_num)
             objects = models.MarketRates.objects.bulk_create(page.object_list, batch_size=100)
-            logger.info(f'{len(objects)} market rates were created')
+            total_count += len(objects)
+            logger.info(f'{total_count} market rates were created')
 
     def read_csv(self, file_path='', file_url=''):
         return mixins.parse_xlxs(file_path, file_url)
