@@ -7,13 +7,15 @@ name = "pypi"
 django-environ = "*"
 django = "*"
 djangorestframework = "*"
-mysqlclient = "*"
 python-dateutil = "*"
 requests = "*"
 django-rq = "*"
 numpy = "*"
 openpyxl = "*"
 django-cors-headers = "*"
+gunicorn = "*"
+whitenoise = "*"
+psycopg = "*"
 
 [dev-packages]
 
